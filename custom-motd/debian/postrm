@@ -1,0 +1,3 @@
+#!/bin/bash
+rm /var/run/motd /etc/motd
+cp /usr/share/base-files/motd /etc/motd

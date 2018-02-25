@@ -1,0 +1,16 @@
+Source: custom-motd
+Section: unknown
+Priority: optional
+Maintainer: Haxe18 <Haxe18>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.8
+Homepage: https://github.com/Haxe18/custom-motd
+Vcs-Git: https://github.com/Haxe18/custom-motd.git
+Vcs-Browser: https://github.com/Haxe18/custom-motd.git
+
+Package: custom-motd
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, bc, awk, python-apt
+Description: Custom motd information like landscape
+ This Packages provides a motd like a ubuntu system with landscape package.
+ Created with with help from https://nickcharlton.net/posts/debian-ubuntu-dynamic-motd.html

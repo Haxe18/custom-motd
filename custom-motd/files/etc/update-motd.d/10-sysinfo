@@ -1,0 +1,167 @@
+#!/bin/bash
+#
+#    10-sysinfo - generate the system information
+#    Copyright (c) 2018 Haxe18
+#
+#    Authors: Haxe18
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+##############################
+##### Define needed Vars #####
+##############################
+IFS_ORG=$IFS
+IFS=
+date=$(date)
+sysld=$(cat /proc/loadavg)
+df=$(df -h /)
+freeh=$(free -h)
+freem=$(free -m)
+
+##############################
+### Calculate printed vars ###
+##############################
+
+systemload=$(echo $sysld | awk '{print $1}')
+if (( $(echo "$systemload > 10.00" |bc -l) )); then
+	exit 1
+fi
+systemload_5=$(echo $sysld | awk '{print $2}')
+systemload_15=$(echo $sysld | awk '{print $3}')
+root_complete_size=$(echo $df | awk 'NR==2 {print $2}')
+root_free=$(echo $df | awk 'NR==2 {print $3}')
+root_usage_percent=$(echo $df | awk 'NR==2 {print $5}')
+processes=$(ps ax --no-headers | wc -l)
+memory_available=$(echo $freeh | awk '/Mem/ {print $2}')
+memory_usage=$(echo $freeh | awk '/Mem/ {print $3}')
+memory_usage_percent=$(echo $freem | awk '/Mem/ { printf("%3.1f%%", $3/$2*100) }')
+swap_total=$(echo $freeh | awk '/Swap/ {print $2}')
+swap_usage=$(echo $freeh | awk '/Swap/ {print $3}')
+swap_usage_percent=$(echo $freem | awk '/Swap/ { printf("%3.1f%%", $3/$2*100) }')
+users=$(users | wc -w)
+interfaces=$(ls -1 /sys/class/net)
+interfaces_count=$(ls -1 /sys/class/net | wc -l)
+IFS=$IFS_ORG
+
+##############################
+### Get IPs from Interfaces ##
+##############################
+zvi4=0
+zvi6=0
+for i in $interfaces; do
+        tmp4=$(/sbin/ifconfig $i | grep -o -E 'inet.[a-zA-Z]*:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | awk -F':' '{print $2}')
+        tmp6=$(/sbin/ifconfig $i | grep -o -Ei 'inet6.[a-zA-Z]+: *[0-9a-f:]+' | grep -v fe80 | awk '{print $NF}')
+
+        if [ -n "$tmp4" ]; then #IF IP da
+                ifn4[$zvi4]=$(echo $i)
+                inf4[$zvi4]=$tmp4
+                zvi4=$(( $zvi4+1 ))
+        fi
+
+        if [ -n "$tmp6" ]; then #IF IP da
+                ifn6[$zvi6]=$(echo $i)
+                inf6[$zvi6]=$tmp6
+                zvi6=$(( $zvi6+1 ))
+        fi
+done
+
+
+##############################
+####### Ouput to User ########
+##############################
+echo
+echo "  System information of: $date"
+echo
+printf "  %-24s %-30s  %-24s %c\n" 'System load:' "$systemload $systemload_5 $systemload_15" 'Active users:' $users
+printf "  %-24s %-30s  %-24s %s\n" 'Usage of /:' "$root_free of $root_complete_size ($root_usage_percent)" 'Processes:' $processes
+printf "  %-24s %-30s  %-24s %s of %s (%s)\n" 'Memory usage:' "$memory_usage of $memory_available ($memory_usage_percent)" 'Swap usage:' $swap_usage $swap_total $swap_usage_percent
+
+nwlne="0"
+
+for i in ${!ifn4[@]};do #For indexes
+        ii=$(( $i+1 ))
+	nwlne="0"
+        if [ $(($ii %2)) -ne 0 ]; then  #Modulo2 wenn ungerade dann Teil 1
+		cnt=1
+                for adr in ${inf4[$i]}; do	#Fuer jede IP
+                        if [ $cnt -eq "1" ]; then	#Wenn gleich dann erste IP und full out
+                                printf "  %-24s %-30s" "IPv4 of Interface ${ifn4[$i]}:" $adr
+                        else	#2 oder mehr IPs
+                                printf "\n  %-24s %-30s" " " $adr
+				nwlne="1"
+                        fi
+                        cnt=$(( $cnt+1 ))
+                done
+                if [ "$nwlne" -eq "1" ]; then	#IF nwlne (2 and more IPs) newline
+                        printf "\n"
+                fi
+        else
+		cnt=1
+                for adr in ${inf4[$i]}; do
+                        if [ $cnt -eq "1" ]; then
+                                printf "  %-24s %s" "IPv4 of Interface ${ifn4[$i]}:" $adr
+				nwlne="1"
+                        else
+                                printf "\n  %-24s %s" " " $adr
+				nwlne="1"
+                        fi
+                        cnt=$(( $cnt+1 ))
+                done
+                if [ "$nwlne" -eq "1" ]; then
+                        printf "\n"
+                fi
+        fi
+done
+
+if [ "$nwlne" -ne "1" ]; then
+	printf "\n"
+fi
+
+for i in ${!ifn6[@]};do #For indexes
+        ii=$(( $i+1 ))
+	nwlne="0"
+        if [ $(($ii %2)) -ne 0 ]; then   #Modulo2
+		cnt=1
+                for adr in ${inf6[$i]}; do
+                        if [ $cnt -eq "1" ]; then
+                                printf "  %-24s %-30s" "IPv6 of Interface ${ifn6[$i]}:" $adr
+                        else
+                                printf "\n  %-24s %-30s" " " $adr
+				nwlne="1"
+                        fi
+                        cnt=$(( $cnt+1 ))
+                done
+		if [ "$nwlne" -eq "1" ]; then
+			printf "\n"
+		fi
+        else
+		cnt=1
+                for adr in ${inf6[$i]}; do
+                        if [ $cnt -eq "1" ]; then
+                                printf "  %-24s %s" "IPv6 of Interface ${ifn6[$i]}:" $adr
+				nwlne="1"
+                        else
+                                printf "\n  %-24s %s" " " $adr
+				nwlne="1"
+                        fi
+                        cnt=$(( $cnt+1 ))
+                done
+                if [ "$nwlne" -eq "1" ]; then
+                        printf "\n"
+                fi
+
+        fi
+done
+echo

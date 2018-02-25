@@ -1,0 +1,3 @@
+#!/bin/bash
+rm /etc/motd
+ln -sf /var/run/motd /etc/motd
