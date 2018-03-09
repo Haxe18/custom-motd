@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/Haxe18/custom-motd.git
 
 Package: custom-motd
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, bc, awk, python-apt
+Depends: ${shlibs:Depends}, ${misc:Depends}, bc, awk, python-apt, lsb-release
 Description: Custom motd information like landscape
  This Packages provides a motd like a ubuntu system with landscape package.
  Created with with help from https://nickcharlton.net/posts/debian-ubuntu-dynamic-motd.html
