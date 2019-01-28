@@ -1,3 +1,10 @@
+custom-motd (1.0.1) unstable; urgency=medium
+
+  * Done some fixes for displaying server ip(s) on debian stretch or newer
+  * Disable display kernel version @ login twice at some distros
+
+ -- Haxe18 <Haxe18>  Mon, 28 Jan 2019 21:16:28 +0100
+
 custom-motd (1.0.0) unstable; urgency=medium
 
   * Initial Release.
