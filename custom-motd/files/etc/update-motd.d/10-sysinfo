@@ -61,8 +61,8 @@ IFS=$IFS_ORG
 zvi4=0
 zvi6=0
 for i in $interfaces; do
-        tmp4=$(/sbin/ifconfig $i | grep -o -E 'inet.[a-zA-Z]*:?[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | awk '{print $NF}')
-        tmp6=$(/sbin/ifconfig $i | grep -o -Ei 'inet6.[a-zA-Z]*:? *[0-9a-f:]+' | grep -v fe80 | awk '{print $NF}')
+        tmp4=$(/sbin/ifconfig $i | grep -o -E 'inet.[a-zA-Z]*:?[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -Eo '[0-9\.]+')
+        tmp6=$(/sbin/ifconfig $i | grep -o -Ei 'inet6.[a-zA-Z]*:? *[0-9a-f:]+' | grep -v fe80 | grep -Eo '[0-9a-z]+:[0-9\.\:a-z]+')
 
         if [ -n "$tmp4" ]; then #IF IP da
                 ifn4[$zvi4]=$(echo $i)

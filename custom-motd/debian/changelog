@@ -1,3 +1,9 @@
+custom-motd (1.0.2) unstable; urgency=medium
+
+  * Fixed separating ip address to be correct on debian jessie systems
+
+ -- Haxe18 <Haxe18>  Tue, 25 Jun 2019 23:24:39 +0200
+
 custom-motd (1.0.1) unstable; urgency=medium
 
   * Done some fixes for displaying server ip(s) on debian stretch or newer
