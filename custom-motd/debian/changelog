@@ -1,3 +1,12 @@
+custom-motd (1.0.3) unstable; urgency=medium
+
+  * Handle case no swap exists
+  * Migrated 20-updates to python3
+  * Cleanup of unneeded files
+  * Fixed deb build warnings with debian bullseye
+
+ -- Haxe18 <Haxe18>  Wed, 04 Jan 2023 20:09:03 +0200
+
 custom-motd (1.0.2) unstable; urgency=medium
 
   * Fixed separating ip address to be correct on debian jessie systems
